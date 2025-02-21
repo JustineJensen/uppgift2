@@ -10,7 +10,6 @@ import 'package:uppgift1/repositories/parkingRepository.dart';
 import 'package:uppgift1/repositories/parkingSpaceRepository.dart';
 import 'package:uppgift1/repositories/personRepository.dart';
 import 'package:uppgift1/repositories/vehicleRepository.dart';
-
   
 Future <void> main() async {
   var personRepo = PersonRepository();
@@ -51,7 +50,7 @@ Future <void> main() async {
   }
 }
 
-void handlePerson(PersonRepository personRepo) {
+Future <void> handlePerson(PersonRepository personRepo) async{
   while (true) {
     print("*****************************************");
     print("\n** Du har valt att hantera Personer. Vad vill du göra **");
@@ -79,7 +78,6 @@ void handlePerson(PersonRepository personRepo) {
           print("\n **Fel: Ange ett giltigt personnummer (12 siffror)!**");
           continue;
         }
-
        int personNummer = int.parse(personnummerStr);
         try {
           Person newPerson = Person(
@@ -87,16 +85,15 @@ void handlePerson(PersonRepository personRepo) {
             personNummer: personNummer
           );
 
-          personRepo.add(newPerson); 
+         await personRepo.add(newPerson); 
           print("\nPerson skapad framgångsrikt!");
         } catch (e) {
           print("\nFel: ${e.toString()}");
-        }
-
-        break;
+       }
+       break;
 
       case "2":
-        final persons = personRepo.findAll();
+        final persons = await personRepo.findAll();
         if (persons.isEmpty) {
           print("\n**Inga personer hittades**");
         } else {
@@ -105,45 +102,42 @@ void handlePerson(PersonRepository personRepo) {
         break;
 
       case "3":
-  stdout.write("\n Ange personens ID som du vill uppdatera: ");
-  int? id = int.tryParse(stdin.readLineSync() ?? "");
-  if (id == null) {
-    print("\n **Fel: Ange ett giltigt ID!**");
-    break;
-  }
+        stdout.write("\n Ange personens ID som du vill uppdatera: ");
+        int? id = int.tryParse(stdin.readLineSync() ?? "");
+        if (id == null) {
+          print("\n **Fel: Ange ett giltigt ID!**");
+          break;
+        }
 
-  try {
-    // Find person by ID first
-    Person person = personRepo.findById(id);
-    
-    // Print details of the person to be updated
-    print("\nPerson found: ID: ${person.id}, Namn: ${person.namn}, PersonNummer: ${person.personNummer}");
+        try {
+          // Find person by ID first
+          Person person = await personRepo.findById(id);
+          
+          // Print details of the person to be updated
+          print("\nPerson found: ID: ${person.id}, Namn: ${person.namn}, PersonNummer: ${person.personNummer}");
 
-    stdout.write("Ange nytt namn: ");
-    String newName = stdin.readLineSync() ?? person.namn;
+          stdout.write("Ange nytt namn: ");
+          String newName = stdin.readLineSync() ?? person.namn;
 
-    stdout.write("Ange nytt Personnummer: ");
-    String? newPersonnummerStr = stdin.readLineSync();
-    
-    int newPersonnummer = (newPersonnummerStr != null && newPersonnummerStr.length == 12 && int.tryParse(newPersonnummerStr) != null)
-        ? int.parse(newPersonnummerStr)
-        : person.personNummer;
+          stdout.write("Ange nytt Personnummer: ");
+          String? newPersonnummerStr = stdin.readLineSync();
+          
+          int newPersonnummer = (newPersonnummerStr != null && newPersonnummerStr.length == 12 && int.tryParse(newPersonnummerStr) != null)
+              ? int.parse(newPersonnummerStr)
+              : person.personNummer;
 
-    // Update person using existing ID
-    personRepo.update(Person(
-      namn: newName,
-      personNummer: newPersonnummer,
-      id: person.id, 
-    ));
+          // Update person using existing ID
+          personRepo.update(Person(
+            namn: newName,
+            personNummer: newPersonnummer,
+            id: person.id, 
+          ));
 
-    print("\n **Person uppdaterad framgångsrikt!**");
-  } catch (e) {
-    print("\n Fel: ${e.toString()}");
-  }
-  break;
-
-
-
+          print("\n **Person uppdaterad framgångsrikt!**");
+        } catch (e) {
+          print("\n Fel: ${e.toString()}");
+        }
+      break;
       case "4":
         stdout.write("\n Ange ID på personen du vill ta bort: ");
         int? deleteId = int.tryParse(stdin.readLineSync() ?? "");
@@ -158,7 +152,7 @@ void handlePerson(PersonRepository personRepo) {
         } catch (e) {
           print("\n Fel: ${e.toString()}");
         }
-        break;
+      break;
 
       case "5":
         print("\nTillbaka till huvudmenyn...");
@@ -171,7 +165,7 @@ void handlePerson(PersonRepository personRepo) {
 }
 
 
-void handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) {
+Future <void> handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) async {
   while (true) {
     print("*****************************************");
     print("\n Du har valt att hantera Fordon. Vad vill du göra?");
@@ -216,7 +210,7 @@ void handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) 
         }
 
         try {
-          Person? owner = personRepo.findById(ownerId);
+          Future<Person> owner = personRepo.findById(ownerId);
           if (owner == null) {
             print("\nFel: Ägaren med ID $ownerId hittades inte!");
             break;
@@ -224,12 +218,12 @@ void handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) 
           Car newCar = Car(
             registreringsNummer: regNum,
             typ: vehicleType, 
-            owner: owner,
+            owner: await owner,
             color: color,
-            id: vehicleRepo.getNextId(),
+            id: await vehicleRepo.getNextId(),
           );
 
-  vehicleRepo.add(newCar);
+    vehicleRepo.add(newCar);
           print("\nFordon registrerat framgångsrikt!");
         } catch (e) {
           print("\nFel: ${e.toString()}");
@@ -237,7 +231,7 @@ void handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) 
         break;
 
       case "2":
-        final vehicles = vehicleRepo.findAll();
+        final vehicles = await vehicleRepo.findAll();
         if (vehicles.isEmpty) {
           print("\nInga fordon hittades.");
         } else {
@@ -255,24 +249,31 @@ void handleVehicles(VehicleRepository vehicleRepo, PersonRepository personRepo) 
           print("\nFel: Ange ett giltigt registreringsnummer!");
           break;
         }
-        try {
-             Vehicle vehicleToDelete = vehicleRepo.getVehicleByRegNum(regNumToDelete)!;
-            vehicleRepo.deleteById(vehicleToDelete.id);
+         try {
+          Vehicle? vehicleToDelete = await vehicleRepo.getVehicleByRegNum(regNumToDelete);
+            
+            if (vehicleToDelete == null) {
+              print("\nFordonet med registreringsnummer '$regNumToDelete' hittades inte.");
+              return; // Exit the function if no vehicle is found
+            }
+
+            await vehicleRepo.deleteById(vehicleToDelete.id);
             print("\nFordon borttaget!");
-          } catch (e) {
+            } catch (e) {
             print("\nFel: ${e.toString()}");
           }
-      case "4":
-        print("\nTillbaka till huvudmenyn...");
-        return;
 
-      default:
-        print("\nOgiltigt val, försök igen.");
-    }
-  }
+      case "4":
+              print("\nTillbaka till huvudmenyn...");
+             return;
+
+        default:
+          print("\nOgiltigt val, försök igen.");
+      }
+   }
 }
 
-void handleParkingPlaces(ParkingSpaceRepository parkingSpaceRepo) {
+Future <void> handleParkingPlaces(ParkingSpaceRepository parkingSpaceRepo) async {
   while (true) {
     print("*****************************************");
     print("\nDu har valt att hantera Parkeringsplatser. Vad vill du göra?");
@@ -325,7 +326,7 @@ void handleParkingPlaces(ParkingSpaceRepository parkingSpaceRepo) {
 
 
       case "2":
-        final spaces = parkingSpaceRepo.findAll();
+        final spaces = await parkingSpaceRepo.findAll();
         if (spaces.isEmpty) {
           print("\nInga parkeringsplatser hittades.");
         } else {
@@ -356,7 +357,7 @@ void handleParkingPlaces(ParkingSpaceRepository parkingSpaceRepo) {
   }
 }
 
-void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo, ParkingSpaceRepository parkingSpaceRepo) {
+Future <void> handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo, ParkingSpaceRepository parkingSpaceRepo)  async{
   while (true) {
     print("*****************************************");
     print("\nDu har valt att hantera Parkeringar. Vad vill du göra?");
@@ -386,15 +387,15 @@ void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo,
         }
 
         try {
-          Vehicle? vehicle = vehicleRepo.getVehicleByRegNum(regNum);
+          Vehicle? vehicle = await vehicleRepo.getVehicleByRegNum(regNum);
            if (vehicle == null) {
               print("\nFel: Fordonet med registreringsnummer $regNum hittades inte!");
               break;
             }
           
-          ParkingSpace parkingSpace = parkingSpaceRepo.findById(parkingSpaceId);
+          ParkingSpace parkingSpace = await parkingSpaceRepo.findById(parkingSpaceId);
           Parking parking = Parking(
-            id:parkingRepo.getNextId(),
+            id: await parkingRepo.getNextId(),
             fordon: vehicle,
             parkingSpace: parkingSpace,
             startTime: DateTime.parse(startTime),
@@ -407,7 +408,7 @@ void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo,
         break;
 
       case "2":
-        final parkings = parkingRepo.findAll();
+        final parkings = await parkingRepo.findAll();
         if (parkings.isEmpty) {
           print("\nInga parkeringar hittades.");
         } else {
@@ -433,7 +434,7 @@ void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo,
         }
 
         try {
-          Parking parking = parkingRepo.findById(parkingId);
+          Parking parking = await parkingRepo.findById(parkingId);
           stdout.write("\nAnge sluttid (YYYY-MM-DD HH:MM): ");
           String? endTimeInput = stdin.readLineSync();
 
@@ -464,7 +465,7 @@ void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo,
           break;
         }
         try {
-          Parking parking = parkingRepo.findById(parkingId);
+          Parking parking = await parkingRepo.findById(parkingId);
           print("\nParkering hittades: ID: ${parking.id}, Fordon: ${parking.vehicle.registreringsNummer}, Parkeringsplats: ${parking.parkingSpace.id}, Starttid: ${parking.startTime}");
 
           stdout.write("\nAnge nytt parkeringsplats ID: ");
@@ -475,7 +476,7 @@ void handleParking(ParkingRepository parkingRepo, VehicleRepository vehicleRepo,
             break;
           }
 
-          ParkingSpace newParkingSpace = parkingSpaceRepo.findById(newParkingSpaceId);
+          ParkingSpace newParkingSpace = await parkingSpaceRepo.findById(newParkingSpaceId);
           parking.parkingSpace = newParkingSpace;
           parkingRepo.update(parking);
           print("\nParkeringens parkeringsadress uppdaterad!");

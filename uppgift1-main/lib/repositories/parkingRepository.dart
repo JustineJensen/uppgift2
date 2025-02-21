@@ -6,29 +6,29 @@ class ParkingRepository extends Repository<Parking,int> {
   int _nextId = 1;
  
   @override
-  Parking add(Parking parking) {
+ Future <Parking>add(Parking parking)async {
     parking.id = _nextId++;
     _parkings.add(parking);
     return parking;
   }
 
   @override
-  void deleteById(int id) {
+  Future <void> deleteById(int id) async {
     _parkings.removeWhere((Parking)=>Parking.id == id);
   }
 
   @override
-  List<Parking> findAll() {
+  Future <List<Parking>> findAll() async{
     return _parkings;
   }
 
   @override
-  Parking findById(int id) {
+  Future <Parking> findById(int id)async {
     return _parkings.firstWhere((parking)=> parking.id == id, orElse: ()=>
     throw Exception("Parking med ID $id hittades inte"),);
   }
   @override
-  void update(Parking entity) {
+  Future <void> update(Parking entity) async {
     int index = _parkings.indexWhere((p)=>p.id ==entity.id);
     if(index != -1){
       _parkings[index] = entity;
@@ -37,7 +37,7 @@ class ParkingRepository extends Repository<Parking,int> {
     }
     
   }
-  int getNextId(){
+  Future <int> getNextId() async{
     return _nextId;
   }
 }
