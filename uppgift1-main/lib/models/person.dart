@@ -31,7 +31,21 @@ class Person {
       throw Exception("Person number must be 12 digits");
     }
   }
+   factory Person.fromJson(Map<String, dynamic> json) {
+    return Person(
+      id: json['id'],  
+      namn: json['namn'], 
+      personNummer: json['personNummer'], 
+    );
+}
+   Map <String,dynamic> toJson(){
+    return{
+      "id":id,
+      "namn": namn,
+      "personNummer":personNummer
+    };
 
+   }
   @override
   String toString() {
     return 'Person(namn: $namn, personNummer: $personNummer, id: $id)';

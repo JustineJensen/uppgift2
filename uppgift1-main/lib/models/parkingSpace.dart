@@ -1,3 +1,5 @@
+import 'dart:core';
+
 class ParkingSpace {
   late int _id;
   late String _adress;
@@ -20,9 +22,23 @@ String get adress => _adress;
 double? get pricePerHour => _pricePerHour;
 
 //Setters
-//set id (int id)=> _id =id;
 set adress(String adress)=>_adress= adress;
 
+ factory ParkingSpace.fromJson( Map<String, dynamic> json) {
+    return ParkingSpace(
+      id: json['id'],  
+      adress: json['adress'], 
+      pricePerHour: json['pricePerHour'], 
+    );
+}
+  Map<String, dynamic> toJson(){
+    return{
+      "id": id,
+      "adress":adress,
+      "pricePerHour": pricePerHour
+    };
+
+}
 @override
 String toString(){
   return'ParkingSpace{id: $_id}, adress: $_adress, pricePerHour: $_pricePerHour}';

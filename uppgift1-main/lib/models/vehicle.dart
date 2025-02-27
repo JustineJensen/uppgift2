@@ -12,7 +12,7 @@ import 'package:uppgift1/models/vehicleType.dart';
  // constructor
   Vehicle({required int id,required String registreringsNummer, required  VehicleType typ, required Person owner})
   :_id =id,
-  _registreringsNummer = registreringsNummer,
+  _registreringsNummer = registreringsNummer, 
   _typ = typ,
   _owner = owner;
 

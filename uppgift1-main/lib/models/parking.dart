@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:uppgift1/models/car.dart';
 import 'package:uppgift1/models/parkingSpace.dart';
 import 'package:uppgift1/models/vehicle.dart';
 
@@ -28,13 +31,29 @@ class Parking {
   DateTime get startTime => _startTime;
   DateTime? get endTime => _endTime;
 
-  //setters
+  //setter
   set id(int id)=> _id = id;
   set fordon(Vehicle value) => _fordon = value;
   set parkingSpace (ParkingSpace value)=> _parkingSpace = parkingSpace;
   set startTime(DateTime startTime)=> _startTime = startTime;
   set endTime (DateTime? endTime)=> _endTime = endTime;
+  
+ factory Parking.fromJson(Map<String,dynamic>json){
+ return Parking(
+  id:json['id'], 
+  fordon: json['fordon'], 
+  parkingSpace: json['parkingSpace'], 
+  startTime: json['startTime']);
+   }
 
+   Map <String ,dynamic> toJson(){
+    return{
+      "id":id,
+      "fordon":Vehicle,
+      "parkingSpace":ParkingSpace,
+      "starTime": startTime
+    };
+   }
   @override
   String toString(){
     return 'Parking{id: $_id, vehicle: ${_fordon.registreringsNummer}, parkingSpace: ${_parkingSpace.id}, startTime: $_startTime, endTime: $_endTime}';
