@@ -40,8 +40,9 @@ class Car extends Vehicle{
       return{
         "id": id,
         "registreringsNummer":registreringsNummer,
-        "typ": VehicleType,
-        "owner" : Person
+        "vehicleTyp":typ.toString() ,
+        "owner" : owner.toJson(),
+        "color" : color, 
       };
 
     }

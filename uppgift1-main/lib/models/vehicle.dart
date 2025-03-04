@@ -26,9 +26,16 @@ import 'package:uppgift1/models/vehicleType.dart';
   set registreringsNummer (String registreringsNummer)=>_registreringsNummer =registreringsNummer;
   set typ(VehicleType typ) => _typ = typ;
   set owner (Person owner) => _owner = owner;
-
+ 
+ factory Vehicle.fromJson(Map<String,dynamic>json){
+  if(json['typ'] == 'car'){
+    return Car.fromJson(json);
+  }
+  throw Exception("unknown vehicle type");
+ }
+  Map<String, dynamic> toJson();
 @override
   String toString() {
     return 'Vehicle{id:$_id,registreringsnummer: $registreringsNummer, typ: $typ, owner: ${owner.namn}}';
   }
-  }
+ }

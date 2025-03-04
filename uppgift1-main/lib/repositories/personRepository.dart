@@ -1,48 +1,99 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:uppgift1/models/person.dart';
 import 'package:uppgift1/repositories/repository.dart';
 
-class PersonRepository extends Repository<Person,int> {
-  
-  final List<Person> _persons =[];
+class PersonRepository extends Repository<Person, int> {
+  final List<Person> _persons = [];
   int _nextId = 1;
 
-  @override
-  Future <Person> add(Person person)async{
-    person = Person(namn: person.namn, personNummer: person.personNummer);
-    _persons.add(person); 
-    return person; 
-  }
+  PersonRepository._internal();
+
+  static final PersonRepository _instance = PersonRepository._internal();
+
+  static PersonRepository get instance => _instance;
 
   @override
-  Future <void> deleteById(int id)async{
-    _persons.removeWhere((person)=> person.id ==id);
-  }
+  Future<Person> add(Person person) async {
+    final uri = Uri.parse("http://localhost:8080/person");
 
-  @override
-  Future <List<Person>> findAll()async{
-    return _persons;
-  }
-  @override
-  Future <Person> findById(int id)async {
-    return _persons.firstWhere((person)=> person.id ==id, orElse:()=>
-    throw Exception("Person med ID $id hittades inte"),);
-  }
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(person.toJson()),
+    );
 
-    @override
-  Future<void>update(Person entity)async {
-    int index = _persons.indexWhere((p) => p.id == entity.id);
-    if (index != -1) {
-      print("Updating person with ID: ${entity.id}");
-      _persons[index].namn = entity.namn;
-      _persons[index].personNummer = entity.personNummer;
-      print("Updated person: ${_persons[index]}");
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return Person.fromJson(json);
     } else {
-      print("Person with ID ${entity.id} not found.");
-      throw Exception("Person med ID ${entity.id} hittades inte.");
+      throw Exception("Failed to add person (HTTP ${response.statusCode})");
     }
   }
-    Future <int> getNextId()async{
-      return _nextId;
+
+  @override
+  Future<void> deleteById(int id) async {
+    final uri = Uri.parse("http://localhost:8080/person/$id");
+
+    final response = await http.delete(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception("Failed to delete person (HTTP ${response.statusCode})");
     }
+  }
+
+  @override
+  Future<List<Person>> findAll() async {
+    final uri = Uri.parse("http://localhost:8080/person");
+    final response = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return (json as List).map((person) => Person.fromJson(person)).toList();
+    } else {
+      throw Exception("Failed to fetch persons (HTTP ${response.statusCode})");
+    }
+  }
+
+  @override
+  Future<Person> findById(int id) async {
+    final uri = Uri.parse("http://localhost:8080/person/$id");
+    final response = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      return Person.fromJson(json);
+    } else {
+      throw Exception("Person with ID $id not found (HTTP ${response.statusCode})");
+    }
+  }
+
+  @override
+  Future<void> update(Person entity) async {
+    final uri = Uri.parse("http://localhost:8080/person/${entity.id}");
+    final response = await http.put(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(entity.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to update person (HTTP ${response.statusCode})");
+    }
+  }
+  Future<int> getNextId() async {
+  return _nextId++;
+}
 
 }

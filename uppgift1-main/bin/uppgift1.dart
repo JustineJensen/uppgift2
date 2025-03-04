@@ -12,10 +12,10 @@ import 'package:uppgift1/repositories/personRepository.dart';
 import 'package:uppgift1/repositories/vehicleRepository.dart';
   
 Future <void> main() async {
-  var personRepo = PersonRepository();
-  var vehicleRepo = VehicleRepository();
-  var parkingSpaceRepo = ParkingSpaceRepository();
-  var parkingRepo = ParkingRepository();
+  var personRepo = PersonRepository.instance;
+  var vehicleRepo = VehicleRepository.instance;
+  var parkingSpaceRepo = ParkingSpaceRepository.instance;
+  var parkingRepo = ParkingRepository.instance;
 
   while(true){
      print('**** Välkommen till Parkeringsappen! ****');
