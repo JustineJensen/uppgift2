@@ -98,7 +98,7 @@ Future<Response> updateVehicle( Request request)async{
 
 }
 // delete
-Future<Response> deletevehicleHandler(Request request) async {
+Future<Response> deleteVehicleHandler(Request request) async {
   final String? id = request.params["id"];
  
   if (id != null) {

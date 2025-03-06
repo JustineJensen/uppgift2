@@ -1,5 +1,10 @@
+
 import 'package:uppgift1/configs/router_config.dart';
-import 'package:uppgift1/configs/server_config.dart';
+import 'package:uppgift1/handlers/parking_handler.dart';
+import 'package:uppgift1/handlers/parkingspace_handler.dart';
+import 'package:uppgift1/handlers/person_handler.dart';
+import 'package:uppgift1/handlers/vehicle_handler.dart';
+import 'package:shelf_router/shelf_router.dart';
 
 class ServerConfig {
   ServerConfig._privateConstructor() {
@@ -9,37 +14,41 @@ class ServerConfig {
   static final ServerConfig _instance = ServerConfig._privateConstructor();
   static ServerConfig get instance => _instance;
 
-  late RouterConfig router;
+  late Router router;
 
+  final ParkingHandler parkingHandler = ParkingHandler();
+  final PersonHandler personHandler = PersonHandler();
+  final VehicleHandler vehicleHandler = VehicleHandler();
+  final ParkingSpaceHandler parkingSpaceHandler = ParkingSpaceHandler();
+  
   Future initialize() async {
-    router = RouterConfig();
+    router = RouterConfig.initialize();
+    //parking
+    router.post('/parkings',parkingHandler. postParkingHandler);
+    router.get('/parkings', parkingHandler.getAllParkingHandler);
+    router.get('/parkings/<id>',parkingHandler.getParkingHandlerById);
+    router.put('/parkings/<id>', parkingHandler.updateParking);
+    router.delete('/parkings/<id>',parkingHandler.deleteParkingHandler);
 
-    // Parking Routes
-    router.post('/parkings', postParkingHandler);
-    router.get('/parkings', getParkingHandler);
-    router.get('/parkings/:id', getParkingHandler); // Fixing placeholder
-    router.put('/parkings/:id', updateParkingHandler); // Fixing placeholder
-    router.delete('/parkings/:id', deleteParkingHandler); // Fixing placeholder
+    //Person
+   router.post('/person',personHandler.postPersonHandler);
+   router.get('/person', personHandler.getAllPersonHandler);
+   router.get('/person/<id>', personHandler.getPersonHandlerById);
+   router.put('/person/<id>',personHandler.updatePerson);
+   router.delete('/person/<id>', personHandler.deletePersonHandler);
 
-    // Person Routes
-    router.post('/person', postPersonHandler);
-    router.get('/person', getPersonHandler);
-    router.get('/person/:id', getPersonHandler); // Fixing placeholder
-    router.put('/person/:id', updatePersonHandler); // Fixing placeholder
-    router.delete('/person/:id', deletePersonHandler); // Fixing placeholder
+    //Vehicle
+    router.get('/vehicles', vehicleHandler.getAllVehicleHandler);
+    router.get('/vehicles', vehicleHandler.getAllVehicleHandler);
+    router.get('/vehicles<id>', vehicleHandler.getVehicleHandlerById);
+    router.put('/vehicles/<id>', vehicleHandler.updateVehicle);
+    router.delete('/vehicles<id>', vehicleHandler.deleteVehicleHandler);
 
-    // Vehicle Routes
-    router.post('/vehicles', postVehicleHandler);
-    router.get('/vehicles', getVehicleHandler);
-    router.get('/vehicles/:id', getVehicleHandler); // Fixing placeholder
-    router.put('/vehicles/:id', updateVehicleHandler); // Fixing placeholder
-    router.delete('/vehicles/:id', deleteVehicleHandler); // Fixing placeholder
-
-    // ParkingSpace Routes
-    router.post('/parkingSpaces', postParkingSpaceHandler);
-    router.get('/parkingSpaces', getParkingSpaceHandler);
-    router.get('/parkingSpaces/:id', getParkingSpaceHandler); // Fixing placeholder
-    router.put('/parkingSpaces/:id', updateParkingSpaceHandler); // Fixing placeholder
-    router.delete('/parkingSpaces/:id', deleteParkingSpaceHandler); // Fixing placeholder
+    //Parkingspace 
+    router.post('/parkingspaces',parkingSpaceHandler.postParkingSpaceHandler);
+    router.get('/parkingspaces', parkingSpaceHandler.getAllParkingSpaceHandler);
+    router.get('/parkingspaces/<id>',parkingSpaceHandler.getParkingHandlerById);
+    router.put('/parkingspaces/<id>', parkingSpaceHandler.updateParkingSpace);
+    router.delete('/parkingspaces/<id>', parkingSpaceHandler.deleteParkingSpaceHandler); 
   }
 }
