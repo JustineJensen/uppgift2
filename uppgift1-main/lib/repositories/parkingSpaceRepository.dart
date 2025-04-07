@@ -1,96 +1,127 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'package:uppgift1/models/parking.dart';
+import 'package:uppgift1/repositories/fileRepository.dart';
 import 'package:uppgift1/repositories/repository.dart';
 import 'package:uppgift1/models/parkingSpace.dart';
 
-class ParkingSpaceRepository extends Repository<ParkingSpace,int> {
-  final List<ParkingSpace>_parkingSpace =[];
-      int _nextId=1;
-
-       ParkingSpaceRepository._internal();
+class ParkingSpaceRepository extends FileRepository<ParkingSpace,int> {
+  int _nextId =0;
+  final String baseUrl = 'http://localhost:8082/parkingSpaces';
+    ParkingSpaceRepository._internal():super('parkingSpace_data.json');
  
+
    static final ParkingSpaceRepository _instance = ParkingSpaceRepository._internal();
 
    static ParkingSpaceRepository get instance => _instance;
     
       @override
     Future <ParkingSpace> add(ParkingSpace parkingSpace) async {
-     final uri = Uri.parse("http://localhost:8080/parkingSpace");
-    Response response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(parkingSpace.toJson()),
-    );
+       try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(parkingSpace.toJson()),
+      );
 
-    final json = jsonDecode(response.body);
-    return ParkingSpace.fromJson(json);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ParkingSpace.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to add parking Space (HTTP ${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Error adding parking Space: $e');
     }
+   }
+
    
      @override
     Future <void> deleteById(int id)async {
-       final uri = Uri.parse("http://localhost:8080/parkingspace/$id");
-
-    Response response = await http.delete(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 204) {
-      return;
-    } else {
-      throw Exception("Failed to delete person (HTTP ${response.statusCode})");
+       try {
+      final response = await http.delete(Uri.parse('$baseUrl/$id'));
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete parking space (HTTP ${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Error deleting parking space: $e');
     }
      }
    
      @override
      Future <List<ParkingSpace>> findAll() async {
-      final uri = Uri.parse("http://localhost:8080/parkingSpace");
-    final response = await http.get(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-    );
+      try {
+      final response = await http.get(Uri.parse(baseUrl));
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => ParkingSpace.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to fetch parking space (HTTP ${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Error fetching parking spaces: $e');
+    }
 
-    final json = jsonDecode(response.body);
-    return (json as List).map((person) => ParkingSpace.fromJson(person)).toList();
      }
    
-     @override
-     Future <ParkingSpace> findById(int id) async {
-       final uri = Uri.parse("http://localhost:8080/parkingSpace/$id");
-      Response response = await http.get(
-        uri,
-        headers: {'Content-Type': 'application/json'},
+     
+    @override
+  Future<ParkingSpace> findById(int id) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/$id'),
+        headers: {'Accept': 'application/json'},
       );
 
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        return ParkingSpace.fromJson(json);
+        final jsonData = jsonDecode(response.body);
+        if (jsonData is Map<String, dynamic>) {
+          return ParkingSpace.fromJson(jsonData);
+        } else {
+          throw Exception('Invalid data format received');
+        }
+      } else if (response.statusCode == 404) {
+        throw Exception('Parking space not found');
       } else {
-        throw Exception("Person with ID $id not found (HTTP ${response.statusCode})");
+        throw Exception('Failed to fetch parking space (HTTP ${response.statusCode})');
       }
+    } catch (e) {
+      throw Exception('Error finding parking space: $e');
     }
-   
+  }
      @override
-     Future <ParkingSpace> update(ParkingSpace entity) async{
-      final uri = Uri.parse("http://localhost:8080/parkingSpace/${entity.id}");
-      Response response = await http.put(
-        uri,
+     Future <ParkingSpace> update(int id,ParkingSpace newParkingSpace) async{
+       try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/$id'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(entity.toJson()),
+        body: jsonEncode(newParkingSpace.toJson()),
       );
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        return ParkingSpace.fromJson(json);
-      } else {
-        throw Exception("Failed to update person (HTTP ${response.statusCode})");
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update parking space (HTTP ${response.statusCode})');
+      }
+      final updatedParkingSpace = ParkingSpace.fromJson(jsonDecode(response.body));
+      return updatedParkingSpace;
+
+    } catch (e) {
+      throw Exception('Error updating parking space: $e');
     }
   }
   Future<int> getNextId() async {
   return _nextId++;
 }
 
-   
+  @override
+  ParkingSpace fromJson(Map<String, dynamic> json) {
+    return ParkingSpace.fromJson(json);
+  }
+
+  @override
+  int idFromType(ParkingSpace parkingSpace) {
+   return parkingSpace.id;
+  }
+
+  @override
+  Map<String, dynamic> toJson(ParkingSpace parkingSpace) {
+    return parkingSpace.toJson();
+  }
   }

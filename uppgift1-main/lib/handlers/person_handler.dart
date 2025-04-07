@@ -1,48 +1,91 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:uppgift1/models/person.dart';
-import 'package:uppgift1/repositories/personRepository.dart';
 
 class PersonHandler {
-  PersonRepository repo = PersonRepository.instance;
-  
-  Future <Response> postPersonHandler(Request request)async{
-  final data = await request.readAsString();
-  final json = jsonDecode(data);
-  var person = Person.fromJson(json);
+  final String _filePath = 'person.json';
 
-  person = await repo.add(person);
+  Future<List<Person>> _readFromFile() async {
+    final file = File(_filePath);
+    
+    if (!await file.exists()) {
+      await file.writeAsString('[]');
+      return [];
+    }
+    final jsonString = await file.readAsString();
+    final List<dynamic> jsonList = jsonDecode(jsonString);
+    return jsonList.map((json) => Person.fromJson(json)).toList();
+  }
 
-  return Response.ok(jsonEncode(person),
-  headers:{'content-Type':'application/json'});
+  Future<void> _writeToFile(List<Person> persons) async {
+    final file = File(_filePath);
+    final jsonList = persons.map((person) => person.toJson()).toList();
+    await file.writeAsString(jsonEncode(jsonList));
+  }
 
+Future<Response> postPersonHandler(Request request) async {
+  try {
+    final data = await request.readAsString();
+    final json = jsonDecode(data);
+    var person = Person.fromJson(json);
+
+    final persons = await _readFromFile();
+    final newId = persons.isEmpty ? 1 : persons.last.id + 1;
+    person = person.copyWith(id: newId);
+
+    persons.add(person);
+    await _writeToFile(persons);
+
+    return Response.ok(
+      jsonEncode(person.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  } catch (e) {
+    return Response.internalServerError(
+      body: jsonEncode({'error': e.toString()}),
+    );
+  }
 }
-Future<Response> getAllPersonHandler(Request request) async{
-  final person = await repo.findAll();
 
-  final payload = person.map((e)=> e.toJson())
 
-  .toList();
-  return Response.ok(
-    jsonEncode(payload),
-    headers: {'Content-Type': 'application/json'},
-  );
-}
-
-//get by id
- Future<Response> getPersonHandlerById(Request request) async {
-  final String? id = request.params["id"];
-
-  if (id != null) {
-    final int? parsedId = int.tryParse(id);
-    if (parsedId != null) {
-      var person = await repo.findById(parsedId);
+  // Get all persons
+  Future<Response> getAllPersonHandler(Request request) async {
+    try {
+      final persons = await _readFromFile();
       return Response.ok(
-        jsonEncode(person),
+        jsonEncode(persons.map((p) => p.toJson()).toList()),
         headers: {'Content-Type': 'application/json'},
       );
-    } else {
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+      );
+    }
+  }
+
+  // Get a person by ID
+  Future<Response> getPersonHandlerById(Request request) async {
+    try {
+      final String? id = request.params['id'];
+      if (id == null) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'ID is required'}),
+        );
+      }
+
+      final persons = await _readFromFile();
+      final person = persons.firstWhere(
+        (p) => p.id == int.parse(id),
+        orElse: () => throw Exception('Person not found'),
+      );
+
+      return Response.ok(
+        jsonEncode(person.toJson()),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
       return Response.badRequest(
         body: jsonEncode({
           'error': 'Invalid ID format',
@@ -52,80 +95,63 @@ Future<Response> getAllPersonHandler(Request request) async{
       );
     }
   }
-  return Response.badRequest(
-    body: jsonEncode({
-      'error': 'Invalid request',
-      'message': 'The required field "id" is missing or invalid.',
-    }),
-    headers: {'Content-Type': 'application/json'},
-  );
-}
-// update
-Future<Response> updatePerson( Request request)async{
-   final String? id = request.params["id"];
 
-    if(id != null){
-    final int? parsedId = int.tryParse(id);
-    if(parsedId != null){
+  // Update a person
+  Future<Response> updatePerson(Request request) async {
+    try {
+      final String? id = request.params['id'];
+      if (id == null) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'ID is required'}),
+        );
+      }
+
       final data = await request.readAsString();
       final json = jsonDecode(data);
+      final updatedPerson = Person.fromJson(json);
 
-      Person? person = Person.fromJson(json); 
-       await repo.update(person);
+      final persons = await _readFromFile();
+      final index = persons.indexWhere((p) => p.id == int.parse(id));
+      if (index == -1) {
+        throw Exception('Person not found');
+      }
+
+      persons[index] = updatedPerson;
+      await _writeToFile(persons);
+
       return Response.ok(
-        jsonEncode(person),
-        headers:{'Content-Type': 'application/json'},
-     );
-    }else{
-      return Response.badRequest(
-        body: jsonEncode({
-          'error': 'Invalid ID format',
-          'message': 'The "id" parameter must be a valid integer.',
-        }),
-        headers: {'Content-Type': 'application/json'},
-      ); 
-    }
-    
-  }
-    return Response.badRequest(
-    body: jsonEncode({
-      'error': 'Invalid request',
-      'message': 'The required field "id" is missing or invalid.',
-    }),
-    headers: {'Content-Type': 'application/json'},
-  );
-
-}
-// delete
-Future<Response> deletePersonHandler(Request request) async {
-  final String? id = request.params["id"];
- 
-  if (id != null) {
-    final int? parsedId = int.tryParse(id); 
-    if (parsedId != null) {
-    
-        await repo.deleteById(parsedId);
-
-        return Response.ok(
-          jsonEncode({'message':'person entry successfully deleted'}),
-          headers: {'Content-Type': 'application/json'},
-        );
-      } 
-    } else {
-      return Response.badRequest(
-        body: jsonEncode({
-          'error': 'Invalid ID format',
-          'message': 'The "id" parameter must be a valid integer.',
-        }),
+        jsonEncode(updatedPerson.toJson()),
         headers: {'Content-Type': 'application/json'},
       );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+      );
     }
-     return Response.badRequest(
-    body: jsonEncode({
-      'error': 'Missing ID',
-      'message': 'The required field "id" is missing or invalid.',
-    }),
-    headers: {'Content-Type': 'application/json'},
-  );
-}
+  }
+
+  // Delete a person
+  Future<Response> deletePersonHandler(Request request) async {
+    try {
+      final String? id = request.params['id'];
+      if (id == null) {
+        return Response.badRequest(
+          body: jsonEncode({'error': 'ID is required'}),
+        );
+      }
+
+      final persons = await _readFromFile();
+      persons.removeWhere((p) => p.id == int.parse(id));
+      await _writeToFile(persons);
+
+      return Response.ok(
+        jsonEncode({'message': 'Person deleted successfully'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(
+        body: jsonEncode({'error': e.toString()}),
+      );
+    }
+  }
 }

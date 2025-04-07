@@ -6,7 +6,7 @@ import 'package:uppgift1/handlers/vehicle_handler.dart';
 import 'package:uppgift1/handlers/parking_handler.dart'; 
 
 class RouterConfig {
-   static Router initialize(){
+  static Router initialize() {
     final router = Router();
 
     final parkingHandler = ParkingHandler();
@@ -14,34 +14,34 @@ class RouterConfig {
     final vehicleHandler = VehicleHandler();
     final parkingSpaceHandler = ParkingSpaceHandler();
 
-//parking
-    router.post('/parkings',parkingHandler. postParkingHandler);
-    router.get('/parkings', parkingHandler.getAllParkingHandler);
-    router.get('/parkings/<id>',parkingHandler.getParkingHandlerById);
-    router.put('/parkings/<id>', parkingHandler.updateParking);
-    router.delete('/parkings/<id>',parkingHandler.deleteParkingHandler);
+    // Parking Routes
+    router.post('/parking', parkingHandler.postParkingHandler);
+    router.get('/parking', parkingHandler.getAllParkingHandler);
+    router.get('/parking/<id>', parkingHandler.getParkingHandlerById);
+    router.put('/parking/<id>', parkingHandler.updateParking);
+    router.delete('/parking/<id>', parkingHandler.deleteParkingHandler);
 
-    //Person
-   router.post('/person',personHandler.postPersonHandler);
-   router.get('/person', personHandler.getAllPersonHandler);
-   router.get('/person/<id>', personHandler.getPersonHandlerById);
-   router.put('/person/<id>',personHandler.updatePerson);
-   router.delete('/person/<id>', personHandler.deletePersonHandler);
+    // Person Routes
+    router.post('/person', personHandler.postPersonHandler);
+    router.get('/person', personHandler.getAllPersonHandler);
+    router.get('/person/<id>', personHandler.getPersonHandlerById);
+    router.put('/person/<id>', personHandler.updatePerson);
+    router.delete('/person/<id>', personHandler.deletePersonHandler);
 
-    //Vehicle
+    // Vehicle Routes
+    router.post('/vehicles', vehicleHandler.postVehicleHandler);
     router.get('/vehicles', vehicleHandler.getAllVehicleHandler);
-    router.get('/vehicles', vehicleHandler.getAllVehicleHandler);
-    router.get('/vehicles<id>', vehicleHandler.getVehicleHandlerById);
+    router.get('/vehicles/<id>', vehicleHandler.getVehicleHandlerById);
     router.put('/vehicles/<id>', vehicleHandler.updateVehicle);
-    router.delete('/vehicles<id>', vehicleHandler.deleteVehicleHandler);
+    router.delete('/vehicles/<id>', vehicleHandler.deleteVehicleHandler);
 
-    //Parkingspace 
-    router.post('/parkingspaces',parkingSpaceHandler.postParkingSpaceHandler);
-    router.get('/parkingspaces', parkingSpaceHandler.getAllParkingSpaceHandler);
-    router.get('/parkingspaces/<id>',parkingSpaceHandler.getParkingHandlerById);
-    router.put('/parkingspaces/<id>', parkingSpaceHandler.updateParkingSpace);
-    router.delete('/parkingspaces/<id>', parkingSpaceHandler.deleteParkingSpaceHandler);
+    // Parking Space Routes
+    router.post('/parkingSpaces', parkingSpaceHandler.postParkingSpaceHandler);
+    router.get('/parkingSpaces', parkingSpaceHandler.getAllParkingSpaceHandler);
+    router.get('/parkingSpaces/<id>', parkingSpaceHandler.getParkingHandlerById);
+    router.put('/parkingSpaces/<id>', parkingSpaceHandler.updateParkingSpace);
+    router.delete('/parkingSpaces/<id>', parkingSpaceHandler.deleteParkingSpaceHandler);
+
     return router;
-
-   }
+  }
 }

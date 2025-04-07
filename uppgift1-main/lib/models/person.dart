@@ -1,10 +1,8 @@
-
-import 'package:uppgift1/models/vehicle.dart';
 class Person {
   static int _idCounter = 0;
-  late int _id;
-  String _namn;
-  int _personNummer;
+  final int id;
+  late String _namn;
+  late int _personNummer;
 
   // Constructor
   Person({
@@ -12,14 +10,12 @@ class Person {
     required int personNummer,
     int? id, 
   })  : _namn = namn,
-        _personNummer = personNummer {
-    _id = id ?? ++_idCounter; 
-  }
+        _personNummer = personNummer,
+        id = id ?? ++_idCounter; 
 
   // Getters
   String get namn => _namn;
   int get personNummer => _personNummer;
-  int get id => _id;
 
   // Setters
   set namn(String namn) => _namn = namn;
@@ -31,21 +27,33 @@ class Person {
       throw Exception("Person number must be 12 digits");
     }
   }
-   factory Person.fromJson(Map<String, dynamic> json) {
-    return Person(
-      id: json['id'],  
-      namn: json['namn'], 
-      personNummer: json['personNummer'], 
-    );
-}
-   Map <String,dynamic> toJson(){
-    return{
-      "id":id,
-      "namn": namn,
-      "personNummer":personNummer
-    };
 
-   }
+  // JSON Serialization
+  factory Person.fromJson(Map<String, dynamic> json) {
+    return Person(
+      id: json['id'], 
+      namn: json['namn'],
+      personNummer: json['personNummer'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "namn": namn,
+      "personNummer": personNummer,
+    };
+  }
+
+  // Copy with new ID
+  Person copyWith({int? id}) {
+    return Person(
+      id: id ?? this.id,
+      namn: namn,
+      personNummer: personNummer,
+    );
+  }
+
   @override
   String toString() {
     return 'Person(namn: $namn, personNummer: $personNummer, id: $id)';

@@ -3,7 +3,7 @@ import 'dart:core';
 class ParkingSpace {
   late int _id;
   late String _adress;
-  final double _pricePerHour;
+   final double _pricePerHour;
   
 //constructor
 ParkingSpace({
@@ -19,7 +19,7 @@ _pricePerHour = pricePerHour;
 //Getters
 int get id => _id;
 String get adress => _adress;
-double? get pricePerHour => _pricePerHour;
+double get pricePerHour => _pricePerHour;
 
 //Setters
 set adress(String adress)=>_adress= adress;
@@ -39,6 +39,14 @@ set adress(String adress)=>_adress= adress;
     };
 
 }
+ParkingSpace copyWith({int? id, String? adress, double? pricePerHour}) {
+    return ParkingSpace(
+      id: id ?? this._id,
+      adress: adress ?? this._adress,
+      pricePerHour: pricePerHour ?? this._pricePerHour,
+    );
+  
+  }
 @override
 String toString(){
   return'ParkingSpace{id: $_id}, adress: $_adress, pricePerHour: $_pricePerHour}';
