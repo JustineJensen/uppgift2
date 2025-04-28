@@ -1,0 +1,1 @@
+[{"id":3,"registreringsNummer":"ebv123","typ":"Motorcycle","owner":{"id":5,"namn":"Justine","personNummer":123456789098},"color":"blue"},{"id":4,"registreringsNummer":"anv123","typ":"Lastbil","owner":{"id":2,"namn":"Tea","personNummer":456789098765},"color":"blue"}]

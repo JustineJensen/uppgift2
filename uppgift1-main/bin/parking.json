@@ -1,1 +1,1 @@
-[{"id":2,"fordon":{"id":1,"registreringsNummer":"anc123","typ":"Lastbil","owner":{"id":2,"namn":"Thea","personNummer":123678987654},"color":"red"},"parkingSpace":{"id":2,"adress":"malmo","pricePerHour":30.0},"startTime":"2025-03-24T12:00:00.000","endTime":null}]
+[{"id":2,"fordon":{"id":1,"registreringsNummer":"anc123","typ":"Lastbil","owner":{"id":2,"namn":"Thea","personNummer":123678987654},"color":"red"},"parkingSpace":{"id":2,"adress":"malmo","pricePerHour":30.0},"startTime":"2025-04-28T20:29:31.522940","endTime":"2025-04-28T21:17:17.316258"}]

@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "uppgift1-main",
+            "cwd": "uppgift1-main",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "uppgift1-main (profile mode)",
+            "cwd": "uppgift1-main",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "uppgift1-main (release mode)",
+            "cwd": "uppgift1-main",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
