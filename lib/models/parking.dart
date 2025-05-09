@@ -63,4 +63,5 @@ class Parking {
   String toString() {
     return 'Parking{id: $_id, vehicle: ${_fordon.registreringsNummer}, parkingSpace: ${_parkingSpace.id}, startTime: $_startTime, endTime: $_endTime}';
   }
+  
 }
